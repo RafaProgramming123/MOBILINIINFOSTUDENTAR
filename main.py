@@ -1,4 +1,5 @@
 import requests
+import uvicorn
 from bs4 import BeautifulSoup
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -6,7 +7,8 @@ from pymongo import MongoClient
 from typing import List
 import os
 from dotenv import load_dotenv
-
+from fastapi.responses import JSONResponse
+from datetime import datetime
 
 load_dotenv()
 CONNECTION_STRING = os.getenv("CONNECTION_STRING")
@@ -79,39 +81,58 @@ def startup_event():
 @app.get("/courses")
 def get_courses():
     courses = courses_collection.find({}, {"_id": 0, "name": 1})
-    return {"courses": [course["name"] for course in courses]}
+    course_list = [course["name"] for course in courses]
+    return JSONResponse(content={"courses": course_list}, media_type="application/json; charset=utf-8")
 
 @app.get("/professors")
 def get_professors():
     professors = professors_collection.find({}, {"_id": 0, "name": 1})
-    return {"professors": [prof["name"] for prof in professors]}
+    professor_list = [prof["name"] for prof in professors]
+    return JSONResponse(content={"professors": professor_list}, media_type="application/json; charset=utf-8")
 
 @app.get("/assistants")
 def get_assistants():
     assistants = assistants_collection.find({}, {"_id": 0, "name": 1})
-    return {"assistants": [assistant["name"] for assistant in assistants]}
+    assistant_list = [assistant["name"] for assistant in assistants]
+    return JSONResponse(content={"assistants": assistant_list}, media_type="application/json; charset=utf-8")
 
 class Comment(BaseModel):
     comment: str
+    time: str  # Ensure that FastAPI automatically parses the ISO string
 
 @app.post("/comments/{entity_type}/{entity_name}")
-def add_comment(entity_type: str, entity_name: str, comment: Comment):
+def add_comment(entity_type: str, entity_name: str, comment: dict):
+    # Validate entity_type
+    print(comment)
     if entity_type not in ["course", "professor", "assistant"]:
         raise HTTPException(status_code=400, detail="Invalid entity type")
-    comments_collection.insert_one({
-        "entity_type": entity_type,
-        "entity_name": entity_name,
-        "comment": comment.comment
-    })
+
+    # Upsert operation: Update if exists, insert if not
+    comments_collection.update_one(
+        {"entity_type": entity_type, "entity_name": entity_name},  # Query
+        {
+            "$push": {"comments": comment},  # Append to the "comment" array
+            "$setOnInsert": {  # Set these fields only on insert
+                "entity_type": entity_type,
+                "entity_name": entity_name,
+            }
+        },
+        upsert=True  # Perform an upsert
+    )
+
     return {"message": "Comment added successfully"}
 
 @app.get("/comments/{entity_type}/{entity_name}")
 def get_comments(entity_type: str, entity_name: str):
     if entity_type not in ["course", "professor", "assistant"]:
         raise HTTPException(status_code=400, detail="Invalid entity type")
-    comments = comments_collection.find({"entity_type": entity_type, "entity_name": entity_name}, {"_id": 0, "comment": 1})
-    return {"comments": [comment["comment"] for comment in comments]}
+    print(entity_type)
+    print(entity_name)
+    comments = comments_collection.find_one({"entity_type": entity_type, "entity_name": entity_name}, {"_id": 0, "comments": 1})
+    print(comments)
+    if comments is None:
+        return []
+    return comments.get("comments", [])
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
