@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "625757561152",
+    "project_id": "mis-studentar",
+    "storage_bucket": "mis-studentar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:625757561152:android:66369859eaafeb7c5f1aa5",
+        "android_client_info": {
+          "package_name": "com.mis_studentar.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChs6U1O_MskPPVKAJkdvAj9Ijvq7hxiV8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
