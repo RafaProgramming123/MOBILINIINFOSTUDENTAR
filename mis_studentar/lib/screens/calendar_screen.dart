@@ -21,7 +21,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   final EventService _eventService = EventService(); // Create an instance of EventService
   String? _profilePictureUrl; // Add this variable
 
-  void _addTask(String type, String course, String professorAssistant, String time) {
+  void _addTask(String type, String course, String professorAssistant, String time, String locationInfo) {
     setState(() {
       if (_tasks[_selectedDay!] == null) {
         _tasks[_selectedDay!] = [];
@@ -32,6 +32,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         course: course,
         datetime: DateTime.now(), // Replace with the actual datetime
         location: GeoPoint(0, 0), // Replace with the actual location
+        location_name: locationInfo, // Pass the location info
         professor: professorAssistant,
         userRef: FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid),
       ));
@@ -52,6 +53,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         task['course'],
         task['professorAssistant'],
         task['time'],
+        task['location_info'], // Pass the location info
       );
     }
   }

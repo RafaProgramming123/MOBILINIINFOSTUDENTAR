@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mis_studentar/main.dart';
-import 'package:mis_studentar/screens/login_page.dart';
 import 'package:mis_studentar/service/shared_pref.dart';
+import 'package:mis_studentar/screens/login_screen.dart';
 
 class AuthService{
   final SharedPref _sharedPref = SharedPref.instance;
@@ -35,7 +35,7 @@ class AuthService{
       _sharedPref.setEmail(null);
     });
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const LoginPage()),
+      Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => LoginScreen()),
       );
     });
   }

@@ -33,6 +33,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   // final DataService _dataService = DataService(baseUrl: 'http://10.0.2.2:8000'); // Create an instance of DataService
 
   LatLng _location = LatLng(45.8125, 15.9778); // Default location (e.g., Zagreb)
+  String _locationInfo = ''; // Store the info of the selected location
     final MapController _mapController = MapController(); // Add MapController
 
   @override
@@ -93,7 +94,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         _selectedTime!.minute, // Use the selected minute
       );
 
-      // Create an Event object with the selected location
+      // Create an Event object with the selected location and info
       Event event = Event(
         id: '', // Firestore will generate the ID
         type: selectedType!,
@@ -102,6 +103,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         location: GeoPoint(_location.latitude, _location.longitude), // Use the selected location
         professor: selectedProfessorAssistant!,
         userRef: FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid), // Set the user reference
+        location_name: _locationInfo, // Pass the selected location info
       );
 
       // Call the createEvent method from EventService
@@ -115,6 +117,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           'professorAssistant': selectedProfessorAssistant,
           'time': _selectedTime!.format(context), // Pass the selected time back
           'location': _location, // Pass the selected location back
+          'location_info': _locationInfo, // Pass the selected location info back
         });
       } else {
         // Show an error message if event creation fails
@@ -128,32 +131,32 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   }
 
-
   void _openFullscreenMap() async {
-    final LatLng? selectedLocation = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FullscreenMap(
-          initialLocation: LatLng(_location.latitude, _location.longitude), // Set an initial location
+  final result = await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => FullscreenMap(
+        initialLocation: LatLng(42.00452183173436, 21.40652447690133), // Set an initial location
+      ),
+    ),
+  );
+
+  // Handle the returned location and info if it's not null
+  if (result != null) {
+    setState(() {
+      _location = result['location']; // Update the selected location
+      _locationInfo = result['info']; // Update the selected location info
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Selected Location: (${_location.latitude}, ${_location.longitude})\nInfo: $_locationInfo',
         ),
       ),
     );
-
-    // Handle the returned location if it's not null
-    if (selectedLocation != null) {
-      setState(() {
-        _location = selectedLocation;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Selected Location: (${selectedLocation.latitude}, ${selectedLocation.longitude})',
-          ),
-        ),
-      );
-    }
   }
+}
 
 
   @override

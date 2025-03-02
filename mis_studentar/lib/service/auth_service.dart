@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mis_studentar/screens/calendar_screen.dart';
-import 'package:mis_studentar/screens/login_page.dart';
 import 'package:mis_studentar/screens/login_screen.dart';
 import 'package:mis_studentar/service/shared_pref.dart';
 import 'package:mis_studentar/domain/student_user.dart';
@@ -32,7 +31,7 @@ class AuthService{
 
       _sharedPref.setEmail(email);
       await Future.delayed(const Duration(seconds: 1));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const LoginPage()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => LoginScreen()));
       return 'Success';
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {

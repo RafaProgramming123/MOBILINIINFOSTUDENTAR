@@ -7,6 +7,7 @@ class Event {
   final DateTime datetime;
   final String professor;
   final GeoPoint location;
+  final String location_name;
   DocumentReference userRef; // Store a reference to the user document
 
   Event({
@@ -17,6 +18,7 @@ class Event {
     required this.location,
     required this.professor,
     required this.userRef,
+    required this.location_name,
   });
 
   Map<String, dynamic> toJson() {
@@ -25,6 +27,7 @@ class Event {
       'course': course,
       'datetime': datetime,
       'location': location,
+      'location_name': location_name,
       'professor': professor,
       'userRef': userRef,
     };
@@ -38,6 +41,7 @@ class Event {
         course: json['course'] ?? 'Unknown', // Provide a default value if null
         datetime: (json['datetime'] as Timestamp).toDate(), // Ensure datetime is not null
         location: json['location'] ?? GeoPoint(0, 0), // Provide a default value if null
+        location_name: json['location_name'] ?? "",
         professor: json['professor'] ?? 'Unknown', // Provide a default value if null
         userRef: json['userRef'], // Ensure userRef is not null
       );

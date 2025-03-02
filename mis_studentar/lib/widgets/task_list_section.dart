@@ -32,7 +32,10 @@ class TaskListSection extends StatelessWidget {
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    'Type: ${task.type ?? 'Unknown'}\nProfessor/Assistant: ${task.professor ?? 'Unknown'}\nTime: ${task.datetime.toString()}',
+                    'Type: ${task.type ?? 'Unknown'}\n'
+                    'Professor/Assistant: ${task.professor ?? 'Unknown'}\n'
+                    'Time: ${task.datetime.toString()}\n'
+                    'Location: ${task.location_name ?? 'Unknown'}', // Add location info
                     style: TextStyle(color: Colors.white70),
                   ),
                 ),
