@@ -9,6 +9,7 @@ import 'package:mis_studentar/providers/DataProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart'; // For location services
 import 'package:mis_studentar/screens/full_map_screen.dart';
+import 'package:mis_studentar/service/data_service.dart';
 
 class AddTaskScreen extends StatefulWidget {
   final DateTime selectedDate; // Add this to pass the selected date from CalendarScreen
@@ -137,6 +138,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     MaterialPageRoute(
       builder: (context) => FullscreenMap(
         initialLocation: LatLng(42.00452183173436, 21.40652447690133), // Set an initial location
+        dataService: DataService(baseUrl: 'http://10.0.2.2:8000'),
+
       ),
     ),
   );

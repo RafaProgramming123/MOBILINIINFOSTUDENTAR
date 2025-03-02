@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mis_studentar/service/data_service.dart'; // Import the DataService
 
 class FullscreenMap extends StatefulWidget {
   final LatLng initialLocation;
+  final DataService dataService; // Add DataService as a parameter
 
-  FullscreenMap({required this.initialLocation});
+  FullscreenMap({required this.initialLocation, required this.dataService});
 
   @override
   _FullscreenMapState createState() => _FullscreenMapState();
@@ -18,88 +20,30 @@ class _FullscreenMapState extends State<FullscreenMap> {
   final MapController _mapController = MapController();
   double _zoomLevel = 18.0; // Initial zoom level
 
-  // Different sets of predefined points
-  final Map<int, List<Map<String, dynamic>>> _predefinedPointSets = {
-    -1: [
-      {
-        'name': 'Просторија 2',
-        'location': LatLng(42.00456510275695, 21.41003616067788),
-        'info': 'Просторија 2 - ТМФ (лабораториска)',
-      },
-      {
-        'name': 'Просторија 3',
-        'location': LatLng(42.00457805807921, 21.40993960115213),
-        'info': 'Просторија 3 - ТМФ (лабораториска)',
-      },
-    ],
-    0: [
-      {
-        'name': 'Барака 1',
-        'location': LatLng(42.00452183173436, 21.40652447690133),
-        'info': 'Барака 1 - ФИНКИ',
-      },
-      {
-        'name': 'Барака 2.1',
-        'location': LatLng(42.00465138492951, 21.406611648700096),
-        'info': 'Барака 2.1 - ФИНКИ',
-      },
-      {
-        'name': 'Барака 2.2',
-        'location': LatLng(42.0046723127281, 21.406473514934085),
-        'info': 'Барака 2.2 - ФИНКИ',
-      },
-      {
-        'name': 'Барака 3.1',
-        'location': LatLng(42.00479887593677, 21.406661269567277),
-        'info': 'Барака 3.1 - ФИНКИ',
-      },
-      {
-        'name': 'Барака 3.2',
-        'location': LatLng(42.00482279336485, 21.40651106586055),
-        'info': 'Барака 3.2 - ФИНКИ',
-      },
-      {
-        'name': 'Амфитеатар',
-        'location': LatLng(42.00518055715937, 21.407860216999502),
-        'info': 'Амфитеатар - МФ'
-      },
-      {
-        'name': 'Амфитеатар',
-        'location': LatLng(42.00433148771571, 21.409048435598123),
-        'info': 'Амфитеатар голем - ФИНКИ '
-      },
-    ],
-    1: [
-      {
-        'name': 'Просторија 138',
-        'location': LatLng(42.004531797376394, 21.41028627505733),
-        'info': 'Просторија 138 ТМФ',
-      },
-      {
-        'name': 'Просторија 115',
-        'location': LatLng(42.00488956280274, 21.410158870126992),
-        'info': 'Просторија 115 ТМФ',
-      },
-    ],
-    2: [
-      {
-        'name': 'Просторија 215',
-        'location': LatLng(42.0051177742418, 21.408137825629645),
-        'info': 'Просторија 215 - МФ',
-      },
-    ],
-  };
-
+  Map<int, List<Map<String, dynamic>>> _predefinedPointSets = {}; // Predefined points fetched from the backend
   List<Map<String, dynamic>> _predefinedPoints = []; // Current set of points
 
   @override
   void initState() {
     super.initState();
     _selectedLocation = widget.initialLocation;
-    _predefinedPoints = _predefinedPointSets[0]!; // Load default points (set 0)
+    _fetchPredefinedPoints(); // Fetch predefined points from the backend
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _mapController.move(_selectedLocation, _zoomLevel);
     });
+  }
+
+  // Fetch predefined points from the backend
+  void _fetchPredefinedPoints() async {
+    try {
+      final points = await widget.dataService.getPredefinedPoints();
+      setState(() {
+        _predefinedPointSets = points;
+        _predefinedPoints = _predefinedPointSets[0] ?? []; // Load default points (set 0)
+      });
+    } catch (e) {
+      print('Failed to fetch predefined points: $e');
+    }
   }
 
   void _getUserLocation() async {

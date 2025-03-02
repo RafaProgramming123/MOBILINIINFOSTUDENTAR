@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
+
 
 class DataService {
   final String baseUrl;
@@ -86,6 +88,36 @@ class DataService {
 
     if (response.statusCode != 200) {
       throw Exception('Failed to add comment');
+    }
+  }
+
+  // Fetch predefined points from the API
+  Future<Map<int, List<Map<String, dynamic>>>> getPredefinedPoints() async {
+    final response = await http.get(Uri.parse('$baseUrl/get_rooms'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print("Received predefined points: $data");
+
+      // Convert the JSON data into the required format
+      Map<int, List<Map<String, dynamic>>> predefinedPoints = {};
+      data.forEach((key, value) {
+        predefinedPoints[int.parse(key)] = List<Map<String, dynamic>>.from(
+          value.map((point) {
+            // Convert the location Map to a LatLng object
+            final location = point['location'];
+            return {
+              'name': point['name'],
+              'location': LatLng(location['latitude'], location['longitude']),
+              'info': point['info'],
+            };
+          }).toList(),
+        );
+      });
+
+      return predefinedPoints;
+    } else {
+      throw Exception('Failed to load predefined points');
     }
   }
 }
