@@ -16,6 +16,7 @@ CONNECTION_STRING = os.getenv("CONNECTION_STRING")
 client = MongoClient(CONNECTION_STRING)
 db = client["finki_data"]
 courses_collection = db["courses"]
+rooms = db["rooms"]
 professors_collection = db["professors"]
 assistants_collection = db["assistants"]
 comments_collection = db["comments"]
@@ -126,13 +127,30 @@ def add_comment(entity_type: str, entity_name: str, comment: dict):
 def get_comments(entity_type: str, entity_name: str):
     if entity_type not in ["course", "professor", "assistant"]:
         raise HTTPException(status_code=400, detail="Invalid entity type")
-    print(entity_type)
-    print(entity_name)
     comments = comments_collection.find_one({"entity_type": entity_type, "entity_name": entity_name}, {"_id": 0, "comments": 1})
-    print(comments)
     if comments is None:
         return []
     return comments.get("comments", [])
+
+@app.get("/get_rooms")
+def get_rooms():
+    rooms_object = rooms.find_one({}, {"_id": 0})
+    formatted_rooms_dict = {}
+    for key, values in rooms_object.items():
+        temp_list = []
+        for point in values:
+            temp_list.append({
+                "name": point.get("name"),
+                "location": {
+                    "latitude": point.get("location").get("coordinates")[1],
+                    "longitude": point.get("location").get("coordinates")[0],
+                },
+                "info": point.get("info")
+            })
+        formatted_rooms_dict[key] = temp_list
+    print(formatted_rooms_dict)
+    return JSONResponse(content=formatted_rooms_dict, media_type="application/json; charset=utf-8")
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
